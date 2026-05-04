@@ -1,0 +1,1026 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>난임 여정: 클리닉 챌린지</title>
+  <style>
+    :root {
+      --bg1: #0f1226;
+      --bg2: #171b35;
+      --bg3: #211f46;
+      --card: rgba(20, 24, 48, 0.84);
+      --card-2: rgba(28, 33, 64, 0.92);
+      --line: rgba(255,255,255,0.08);
+      --text: #f7f8ff;
+      --muted: #b9bedb;
+      --primary: #8b5cf6;
+      --accent: #ec4899;
+      --cyan: #67e8f9;
+      --good: #22c55e;
+      --bad: #f87171;
+      --gold: #fbbf24;
+      --shadow: 0 18px 48px rgba(0, 0, 0, 0.28);
+      --radius: 24px;
+    }
+
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: "Pretendard", "Apple SD Gothic Neo", "Noto Sans KR", sans-serif;
+      background:
+        radial-gradient(circle at top left, rgba(139,92,246,0.18) 0%, transparent 28%),
+        radial-gradient(circle at top right, rgba(103,232,249,0.12) 0%, transparent 24%),
+        linear-gradient(145deg, var(--bg1), var(--bg2) 45%, var(--bg3));
+      color: var(--text);
+      min-height: 100vh;
+      padding: 14px;
+    }
+
+    .app {
+      max-width: 900px;
+      margin: 0 auto;
+      display: grid;
+      gap: 12px;
+    }
+
+    .panel {
+      background: var(--card);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 18px;
+      border: 1px solid var(--line);
+      backdrop-filter: blur(16px);
+    }
+
+    .topbar, .row {
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 14px;
+      border-radius: 999px;
+      background: rgba(255,255,255,0.06);
+      font-size: 0.9rem;
+      font-weight: 800;
+      color: var(--muted);
+      box-shadow: inset 0 0 0 1px var(--line);
+    }
+
+    .brand {
+      background: linear-gradient(135deg, rgba(139,92,246,0.22), rgba(236,72,153,0.18));
+      color: #fff;
+    }
+
+    h1, h2, h3 { margin: 0; }
+    h1 { font-size: 1.58rem; line-height: 1.25; }
+    h2 { font-size: 1.2rem; line-height: 1.35; }
+    p { margin: 0; line-height: 1.62; color: var(--muted); font-size: 0.97rem; }
+
+    .hero {
+      display: grid;
+      gap: 8px;
+      margin-top: 14px;
+    }
+
+    .progress-wrap {
+      display: grid;
+      gap: 10px;
+      margin-top: 14px;
+    }
+
+    .progress-label {
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+      font-size: 0.92rem;
+      color: var(--muted);
+      font-weight: 800;
+      flex-wrap: wrap;
+    }
+
+    .progress {
+      height: 14px;
+      border-radius: 999px;
+      background: rgba(255,255,255,0.06);
+      overflow: hidden;
+      box-shadow: inset 0 0 0 1px rgba(255,255,255,0.04);
+    }
+
+    .progress-bar {
+      height: 100%;
+      width: 0%;
+      border-radius: inherit;
+      background: linear-gradient(90deg, var(--cyan), var(--primary), var(--accent));
+      transition: width 0.35s ease;
+    }
+
+    .stage-grid {
+      display: grid;
+      grid-template-columns: repeat(6, 1fr);
+      gap: 10px;
+      margin-top: 14px;
+    }
+
+    .stage-btn {
+      border: none;
+      cursor: pointer;
+      padding: 14px 10px;
+      border-radius: 20px;
+      background: rgba(255,255,255,0.05);
+      box-shadow: inset 0 0 0 1px var(--line);
+      text-align: center;
+      transition: transform 0.12s ease, box-shadow 0.18s ease, opacity 0.18s ease;
+      color: var(--text);
+    }
+
+    .stage-btn:hover { box-shadow: inset 0 0 0 1px rgba(139,92,246,0.28), 0 8px 20px rgba(0,0,0,0.16); }
+    .stage-btn:active { transform: scale(0.98); }
+    .stage-btn.active {
+      box-shadow: inset 0 0 0 2px rgba(103,232,249,0.5), 0 10px 24px rgba(103,232,249,0.10);
+      background: rgba(103,232,249,0.07);
+    }
+    .stage-btn.done {
+      background: rgba(34,197,94,0.10);
+      box-shadow: inset 0 0 0 2px rgba(34,197,94,0.22);
+    }
+    .stage-btn.locked {
+      opacity: 0.45;
+      filter: saturate(0.65);
+    }
+    .stage-btn.boss {
+      background: rgba(251,191,36,0.10);
+      box-shadow: inset 0 0 0 2px rgba(251,191,36,0.16);
+    }
+
+    .stage-num {
+      width: 36px;
+      height: 36px;
+      margin: 0 auto 8px;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 900;
+      color: white;
+      background: linear-gradient(135deg, var(--primary), var(--accent));
+      box-shadow: 0 8px 18px rgba(139,92,246,0.20);
+    }
+
+    .stage-btn.boss .stage-num {
+      background: linear-gradient(135deg, var(--gold), #f97316);
+      box-shadow: 0 8px 18px rgba(251,191,36,0.22);
+    }
+
+    .stage-name {
+      font-size: 0.86rem;
+      font-weight: 800;
+      line-height: 1.35;
+    }
+
+    .content-grid {
+      display: grid;
+      grid-template-columns: 0.92fr 1.45fr;
+      gap: 12px;
+    }
+
+    .scene-card, .question-box {
+      background: var(--card-2);
+      border-radius: 22px;
+      padding: 16px;
+      box-shadow: inset 0 0 0 1px rgba(255,255,255,0.05);
+    }
+
+    .scene-card {
+      display: grid;
+      gap: 14px;
+      min-height: 100%;
+    }
+
+    .hud-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 10px;
+    }
+
+    .hud-card {
+      background: rgba(255,255,255,0.05);
+      border-radius: 18px;
+      padding: 12px;
+      border: 1px solid var(--line);
+    }
+
+    .hud-label {
+      color: var(--muted);
+      font-size: 0.82rem;
+      font-weight: 800;
+      margin-bottom: 6px;
+    }
+
+    .hud-value {
+      font-size: 1.1rem;
+      font-weight: 900;
+      color: #fff;
+    }
+
+    .pixel-scene {
+      min-height: 210px;
+      border-radius: 20px;
+      position: relative;
+      overflow: hidden;
+      background:
+        radial-gradient(circle at top center, rgba(103,232,249,0.08), transparent 40%),
+        linear-gradient(180deg, rgba(18,20,44,1), rgba(28,33,64,1));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: inset 0 0 0 1px rgba(255,255,255,0.05);
+    }
+
+    .floor {
+      position: absolute;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      height: 26px;
+      background:
+        repeating-linear-gradient(
+          90deg,
+          rgba(53,58,104,1) 0 18px,
+          rgba(69,74,126,1) 18px 36px
+        );
+    }
+
+    .pixel-hero, .pixel-boss {
+      width: 18px;
+      height: 18px;
+      position: relative;
+      image-rendering: pixelated;
+      transform-origin: center bottom;
+      z-index: 2;
+    }
+
+    .pixel-hero {
+      transform: scale(3.4);
+      animation: bob 1s infinite ease-in-out;
+    }
+
+    .pixel-hero::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background:
+        linear-gradient(#f6c3a5 0 0),
+        linear-gradient(#6d28d9 0 0),
+        linear-gradient(#ec4899 0 0),
+        linear-gradient(#4c1d95 0 0),
+        linear-gradient(#4c1d95 0 0),
+        linear-gradient(#0f172a 0 0),
+        linear-gradient(#0f172a 0 0),
+        linear-gradient(#0f172a 0 0),
+        linear-gradient(#0f172a 0 0);
+      background-repeat: no-repeat;
+      background-size:
+        8px 5px, 10px 3px, 12px 5px, 4px 5px, 4px 5px, 3px 4px, 3px 4px, 2px 3px, 2px 3px;
+      background-position:
+        5px 0, 4px 4px, 3px 7px, 4px 11px, 10px 11px, 4px 11px, 11px 11px, 5px 15px, 11px 15px;
+    }
+
+    .pixel-boss {
+      transform: scale(3.7);
+      animation: bossbob 1.1s infinite ease-in-out;
+      position: absolute;
+      right: 18%;
+      bottom: 34px;
+      filter: drop-shadow(0 4px 8px rgba(0,0,0,0.25));
+    }
+
+    .pixel-boss::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background:
+        linear-gradient(#fde68a 0 0),
+        linear-gradient(#f59e0b 0 0),
+        linear-gradient(#7c2d12 0 0),
+        linear-gradient(#7c2d12 0 0),
+        linear-gradient(#1f2937 0 0),
+        linear-gradient(#1f2937 0 0),
+        linear-gradient(#111827 0 0),
+        linear-gradient(#111827 0 0);
+      background-repeat: no-repeat;
+      background-size:
+        9px 5px, 13px 7px, 4px 5px, 4px 5px, 3px 4px, 3px 4px, 2px 3px, 2px 3px;
+      background-position:
+        4px 0, 2px 5px, 3px 11px, 11px 11px, 3px 11px, 12px 11px, 4px 15px, 12px 15px;
+    }
+
+    .pixel-object {
+      width: 16px;
+      height: 16px;
+      position: absolute;
+      right: 18%;
+      bottom: 34px;
+      transform: scale(2.8);
+      transform-origin: center bottom;
+      image-rendering: pixelated;
+      animation: floaty 1.5s infinite ease-in-out;
+      filter: drop-shadow(0 4px 8px rgba(0,0,0,0.25));
+    }
+
+    .pixel-object.book::before,
+    .pixel-object.test::before,
+    .pixel-object.pill::before,
+    .pixel-object.heart::before,
+    .pixel-object.gift::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background-repeat: no-repeat;
+    }
+
+    .pixel-object.book::before {
+      background:
+        linear-gradient(#60a5fa 0 0) 2px 3px / 5px 10px no-repeat,
+        linear-gradient(#f472b6 0 0) 9px 3px / 5px 10px no-repeat,
+        linear-gradient(#dbeafe 0 0) 7px 3px / 1px 10px no-repeat;
+    }
+    .pixel-object.test::before {
+      background:
+        linear-gradient(#93c5fd 0 0) 6px 1px / 4px 3px no-repeat,
+        linear-gradient(#60a5fa 0 0) 5px 4px / 6px 9px no-repeat,
+        linear-gradient(#dbeafe 0 0) 6px 6px / 4px 5px no-repeat;
+    }
+    .pixel-object.pill::before {
+      background:
+        linear-gradient(#f472b6 0 0) 3px 4px / 10px 4px no-repeat,
+        linear-gradient(#ffffff 0 0) 8px 4px / 5px 4px no-repeat,
+        linear-gradient(#fb7185 0 0) 4px 9px / 8px 2px no-repeat;
+    }
+    .pixel-object.heart::before {
+      background:
+        linear-gradient(#fb7185 0 0) 4px 3px / 3px 3px no-repeat,
+        linear-gradient(#fb7185 0 0) 9px 3px / 3px 3px no-repeat,
+        linear-gradient(#fb7185 0 0) 3px 5px / 10px 6px no-repeat,
+        linear-gradient(#fb7185 0 0) 5px 11px / 6px 3px no-repeat;
+    }
+    .pixel-object.gift::before {
+      background:
+        linear-gradient(#f59e0b 0 0) 3px 5px / 10px 8px no-repeat,
+        linear-gradient(#fde68a 0 0) 7px 5px / 2px 8px no-repeat,
+        linear-gradient(#ec4899 0 0) 4px 3px / 8px 2px no-repeat,
+        linear-gradient(#ec4899 0 0) 6px 1px / 4px 4px no-repeat;
+    }
+
+    @keyframes bob {
+      0%, 100% { transform: scale(3.4) translateY(0); }
+      50% { transform: scale(3.4) translateY(-2px); }
+    }
+    @keyframes bossbob {
+      0%, 100% { transform: scale(3.7) translateY(0); }
+      50% { transform: scale(3.7) translateY(-3px); }
+    }
+    @keyframes floaty {
+      0%, 100% { transform: scale(2.8) translateY(0); }
+      50% { transform: scale(2.8) translateY(-3px); }
+    }
+
+    .question-box {
+      display: grid;
+      gap: 12px;
+    }
+
+    .tag {
+      display: inline-block;
+      width: fit-content;
+      padding: 7px 12px;
+      border-radius: 999px;
+      background: linear-gradient(135deg, rgba(103,232,249,0.16), rgba(139,92,246,0.16));
+      color: #fff;
+      font-weight: 800;
+      font-size: 0.83rem;
+    }
+
+    .choice-list {
+      display: grid;
+      gap: 10px;
+    }
+
+    .choice-btn, .action-btn, .secondary-btn {
+      border: none;
+      cursor: pointer;
+      font: inherit;
+      border-radius: 18px;
+      transition: transform 0.12s ease, opacity 0.18s ease, box-shadow 0.18s ease;
+    }
+
+    .choice-btn:active, .action-btn:active, .secondary-btn:active { transform: scale(0.97); }
+
+    .choice-btn {
+      width: 100%;
+      text-align: left;
+      background: rgba(255,255,255,0.05);
+      padding: 14px;
+      color: var(--text);
+      font-weight: 700;
+      border: 1px solid var(--line);
+      box-shadow: 0 10px 22px rgba(0,0,0,0.12);
+    }
+
+    .choice-btn:hover { box-shadow: 0 12px 24px rgba(0,0,0,0.16); }
+    .choice-btn.correct { background: rgba(34,197,94,0.13); border-color: rgba(34,197,94,0.28); color: #d7ffe3; }
+    .choice-btn.wrong { background: rgba(248,113,113,0.12); border-color: rgba(248,113,113,0.26); color: #ffe0e0; }
+    .choice-btn.dim { opacity: 0.5; }
+
+    .feedback {
+      display: none;
+      border-radius: 18px;
+      padding: 14px;
+      line-height: 1.6;
+      font-size: 0.95rem;
+      border: 1px solid var(--line);
+    }
+
+    .feedback.show { display: block; }
+    .feedback.good { background: rgba(34,197,94,0.12); color: #d7ffe3; }
+    .feedback.bad { background: rgba(248,113,113,0.12); color: #ffe3e3; }
+    .feedback.info { display: block; background: rgba(103,232,249,0.09); color: #d8fffa; }
+
+    .action-row {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .action-btn {
+      flex: 1;
+      min-width: 180px;
+      padding: 14px 16px;
+      background: linear-gradient(135deg, var(--primary), var(--accent));
+      color: white;
+      font-weight: 800;
+      box-shadow: 0 12px 26px rgba(139,92,246,0.20);
+    }
+
+    .secondary-btn {
+      flex: 1;
+      min-width: 160px;
+      padding: 14px 16px;
+      background: rgba(255,255,255,0.06);
+      color: var(--muted);
+      font-weight: 800;
+      border: 1px solid var(--line);
+    }
+
+    .heart-station, .clear-card, .start-screen {
+      border-radius: 20px;
+      padding: 16px;
+      border: 1px solid var(--line);
+    }
+
+    .heart-station, .clear-card {
+      display: none;
+      margin-top: 12px;
+    }
+
+    .heart-station.show {
+      display: block;
+      background: linear-gradient(135deg, rgba(251,113,133,0.12), rgba(245,158,11,0.12));
+    }
+
+    .clear-card.show {
+      display: block;
+      background: linear-gradient(135deg, rgba(34,197,94,0.10), rgba(103,232,249,0.10));
+    }
+
+    .start-screen {
+      background: linear-gradient(135deg, rgba(139,92,246,0.18), rgba(236,72,153,0.12));
+      display: grid;
+      gap: 12px;
+      text-align: center;
+      padding: 28px 20px;
+    }
+
+    .start-screen.hidden { display: none; }
+
+    .start-pixel-wrap {
+      min-height: 170px;
+      border-radius: 22px;
+      background: linear-gradient(180deg, rgba(18,20,44,1), rgba(28,33,64,1));
+      position: relative;
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: inset 0 0 0 1px rgba(255,255,255,0.05);
+    }
+
+    .start-floor {
+      position: absolute;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      height: 28px;
+      background:
+        repeating-linear-gradient(90deg, rgba(53,58,104,1) 0 18px, rgba(69,74,126,1) 18px 36px);
+    }
+
+    .start-team {
+      display: flex;
+      gap: 40px;
+      align-items: flex-end;
+      position: relative;
+      z-index: 2;
+    }
+
+    .hidden-main { display: none; }
+
+    @media (max-width: 760px) {
+      .stage-grid { grid-template-columns: repeat(3, 1fr); }
+      .content-grid { grid-template-columns: 1fr; }
+    }
+
+    @media (max-width: 560px) {
+      .stage-grid { grid-template-columns: repeat(2, 1fr); }
+      .hud-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <section class="panel start-screen" id="startScreen">
+      <div class="pill brand" style="margin:0 auto;">🎮 난임 여정: 클리닉 챌린지</div>
+      <h1>클리닉 챌린지에 접속했습니다</h1>
+      <p>정의, 원인, 검사, 치료, 시술 후 주의, 정서와 지원까지. 빠르게 풀수록 보너스 점수가 붙고, 4스테이지 이후에는 하트 1칸 충전 기회가 열리며 마지막에는 보스 퀴즈가 기다립니다.</p>
+      <div class="start-pixel-wrap">
+        <div class="start-team">
+          <div class="pixel-hero"></div>
+          <div class="pixel-boss"></div>
+        </div>
+        <div class="start-floor"></div>
+      </div>
+      <div class="action-row">
+        <button class="action-btn" id="startBtn">게임 시작</button>
+      </div>
+    </section>
+
+    <div id="mainGame" class="hidden-main">
+      <section class="panel">
+        <div class="topbar">
+          <div class="pill brand">🧪 난임 여정: 클리닉 챌린지</div>
+          <div class="pill">❤️ 라이프 <span id="lives">3</span></div>
+          <div class="pill">🏆 점수 <span id="score">0</span></div>
+          <div class="pill">⏱️ 남은 시간 <span id="timerText">20</span>s</div>
+        </div>
+
+        <div class="hero">
+          <h1>빠를수록 점수가 더 오른다</h1>
+          <p>각 스테이지에는 제한 시간이 있고, 남은 시간이 많을수록 보너스 점수가 붙습니다. 4스테이지를 끝내면 하트 1칸 충전 기회가 열리고, 보스 문제는 정답 시 점수가 2배로 계산됩니다.</p>
+        </div>
+
+        <div class="progress-wrap">
+          <div class="progress-label">
+            <span>미션 진행률 <span id="progressText">0%</span></span>
+            <span>클리어 <span id="doneCount">0</span> / 6</span>
+          </div>
+          <div class="progress"><div class="progress-bar" id="progressBar"></div></div>
+        </div>
+
+        <div class="stage-grid" id="stageGrid"></div>
+      </section>
+
+      <section class="panel content-grid">
+        <div class="scene-card">
+          <div class="tag" id="sceneTag">STAGE 1</div>
+          <h2 id="sceneTitle">초기 평가</h2>
+          <p id="sceneSummary"></p>
+
+          <div class="hud-grid">
+            <div class="hud-card">
+              <div class="hud-label">현재 문제 시간</div>
+              <div class="hud-value"><span id="miniTimer">20</span>s</div>
+            </div>
+            <div class="hud-card">
+              <div class="hud-label">최대 보너스</div>
+              <div class="hud-value" id="bonusHint">+20점</div>
+            </div>
+          </div>
+
+          <div class="pixel-scene" id="sceneArea">
+            <div class="pixel-hero" id="heroSprite"></div>
+            <div class="pixel-object book" id="sceneObject"></div>
+            <div class="pixel-boss" id="bossSprite" style="display:none;"></div>
+            <div class="floor"></div>
+          </div>
+
+          <div class="heart-station" id="heartStation">
+            <div style="display:grid; gap:8px;">
+              <h3>💖 회복 기회 해금</h3>
+              <p>4스테이지를 완료했습니다. 여기서 하트 1칸을 회복할 수 있어요.</p>
+              <div class="action-row">
+                <button class="action-btn" id="healBtn">하트 1칸 충전</button>
+              </div>
+            </div>
+          </div>
+
+          <div class="clear-card" id="clearCard">
+            <h3>🏁 챌린지 완료</h3>
+            <p>모든 스테이지와 보스 퀴즈까지 마무리했어요. 발표에서는 이 화면을 엔딩 장면으로 사용하면 좋아요.</p>
+          </div>
+        </div>
+
+        <div class="question-box">
+          <div class="tag" id="questionTag">STAGE 1 · 초기 평가</div>
+          <h2 id="questionTitle">초기 평가</h2>
+          <p id="questionStory" class="feedback info"></p>
+          <p id="questionPrompt"></p>
+          <div class="choice-list" id="choiceList"></div>
+          <div class="feedback" id="feedback"></div>
+          <div class="action-row">
+            <button class="secondary-btn" id="restartBtn">처음부터 다시 시작</button>
+            <button class="action-btn" id="nextBtn" style="display:none;">다음 단계로</button>
+          </div>
+        </div>
+      </section>
+    </div>
+  </div>
+
+  <script>
+    const stages = [
+      {
+        title: "초기 평가",
+        badge: "초기 평가",
+        object: "book",
+        timeLimit: 20,
+        story: "첫 방문 부부가 접수창구에서 질문합니다. 난임의 정의와 원인 분포를 먼저 이해해야 이후 검사와 치료 흐름도 덜 혼란스러워집니다.",
+        question: "다음 중 자료의 흐름에 가장 정확하게 맞는 설명은?",
+        choices: [
+          "난임은 6개월간 임신이 되지 않는 경우를 말하고, 원인 대부분은 기타 요인이다.",
+          "난임은 1년간 임신이 되지 않는 경우를 말하며, 여성측 요소는 40~50%, 남성측 요소는 30~40%로 제시된다.",
+          "임신 경험이 없으면 모두 속발성 난임이며, 원인불명은 거의 없다."
+        ],
+        answer: 1,
+        explanation: "난임은 정상적인 부부관계에도 1년간 임신이 되지 않는 경우이고, 자료에서는 여성측 요소 40~50%, 남성측 요소 30~40%, 원인불명 약 10%로 제시됩니다."
+      },
+      {
+        title: "검사 판단",
+        badge: "검사 판단",
+        object: "test",
+        timeLimit: 22,
+        story: "난임 평가는 남녀를 함께 보아야 합니다. 검사 목적에 따라 어떤 방법을 우선 선택하는지가 중요해집니다.",
+        question: "배란 여부 확인과 남성 기초평가를 함께 고려할 때 가장 알맞은 조합은?",
+        choices: [
+          "여성은 기초체온 검사, 남성은 정액검사를 우선 고려할 수 있다.",
+          "여성은 청력검사, 남성은 흉부 X-ray를 우선 고려한다.",
+          "여성은 자궁내막검사만 하고, 남성은 검사를 생략해도 된다."
+        ],
+        answer: 0,
+        explanation: "자료에는 배란 예측을 위한 기초체온 검사 등이 제시되고, 남성 난임의 가장 중요한 기초검사로 정액검사가 제시됩니다."
+      },
+      {
+        title: "치료 전략",
+        badge: "치료 전략",
+        object: "pill",
+        timeLimit: 24,
+        story: "검사 뒤에는 원인에 맞는 치료 전략을 세워야 합니다. 단편적 암기보다 상황에 맞는 연결이 더 중요해지는 단계입니다.",
+        question: "다음 중 자료 내용에 맞는 치료 연결로 가장 적절한 것은?",
+        choices: [
+          "배란장애에는 배란유도가 흔히 사용되며, 난관폐쇄에서 수술이 부적합한 경우 체외수정을 시도할 수 있다.",
+          "배란장애에는 무조건 수술을 하고, 난관폐쇄는 생활습관 교정만 한다.",
+          "남성 난임에서는 어떤 경우에도 인공수정을 고려하지 않는다."
+        ],
+        answer: 0,
+        explanation: "자료에는 배란유도가 흔한 치료법으로 제시되고, 난관폐쇄에서 수술이 부적합한 경우 체외수정을 시도할 수 있다고 설명합니다."
+      },
+      {
+        title: "회복과 생활",
+        badge: "회복과 생활",
+        object: "heart",
+        timeLimit: 22,
+        story: "시술 후 주의사항과 일상관리 교육이 이어집니다. 위험 신호와 생활 요인을 동시에 구분해 설명할 수 있어야 합니다.",
+        question: "다음 중 '즉시 병원 방문이 필요한 증상'과 '임신 가능성에 악영향을 줄 수 있는 요인'을 모두 올바르게 짝지은 것은?",
+        choices: [
+          "잠깐 피곤함 + 규칙적 수면",
+          "복수와 호흡곤란 + 흡연",
+          "가벼운 기분 변화 + 균형 잡힌 식사"
+        ],
+        answer: 1,
+        explanation: "자료에는 난소과자극증후군의 위험 징후로 복수와 호흡곤란 등이 제시되고, 흡연은 임신 가능성에 악영향을 줄 수 있는 요인으로 설명됩니다."
+      },
+      {
+        title: "정서와 지원",
+        badge: "정서와 지원",
+        object: "gift",
+        timeLimit: 24,
+        story: "마지막 기본 단계는 정보와 태도를 함께 묻습니다. 정서 반응과 지원제도를 묶어 이해해야 실제 교육 흐름이 완성됩니다.",
+        question: "다음 중 자료의 정서관리와 지원제도 설명에 가장 잘 맞는 것은?",
+        choices: [
+          "난임 치료 중 우울감은 드물며, 국내에는 난임치료휴가나 심리상담 지원이 거의 없다.",
+          "환자의 감정은 빨리 정리하도록 돕는 것이 중요하며, 지원은 해외 사례에서만 주로 볼 수 있다.",
+          "난임 치료 중 충격, 부정, 분노, 우울 등의 반응이 나타날 수 있으며, 국내에는 난임치료휴가, 시술비 지원, 심리상담 지원 등이 제시된다."
+        ],
+        answer: 2,
+        explanation: "자료에는 난임 치료 중 여러 정서 반응이 자연스럽게 나타날 수 있다고 설명하고, 국내 지원으로 난임치료휴가, 시술비 지원, 심리상담센터 운영 등을 제시합니다."
+      },
+      {
+        title: "보스 퀴즈",
+        badge: "보스",
+        boss: true,
+        timeLimit: 28,
+        story: "최종 단계입니다. 지금까지의 정보를 하나로 엮어야 합니다. 단편적인 암기보다 흐름을 이해했는지 묻는 결전 문제예요.",
+        question: "다음 상황에 가장 적절한 설명은 무엇일까요?\n임신 경험이 없는 부부가 1년간 임신되지 않아 검사 중이며, 여성은 배란 여부 평가가 필요하고 남성은 기초평가가 필요합니다. 치료 중에는 정서적 지지와 국내 지원제도 안내도 중요합니다.",
+        choices: [
+          "원발성 난임 가능성을 생각할 수 있고, 여성은 기초체온 검사 같은 배란평가를, 남성은 정액검사를 고려할 수 있으며, 정서적 공감과 난임치료휴가·시술비 지원 안내가 도움이 된다.",
+          "속발성 난임 가능성이 높고, 여성은 청력검사, 남성은 검사를 생략하는 것이 우선이며, 감정 표현은 줄이도록 권하는 것이 좋다.",
+          "원인불명으로 단정하고 추가 검사보다 생활습관만 설명하면 충분하다."
+        ],
+        answer: 0,
+        explanation: "임신 경험이 없으면 원발성 난임을 생각할 수 있고, 여성의 배란평가와 남성의 정액검사 같은 기초평가가 중요합니다. 또한 정서적 지지와 국내 지원제도 안내도 실제 교육에서 핵심입니다."
+      }
+    ];
+
+    let currentStage = 0;
+    let score = 0;
+    let lives = 3;
+    let completed = new Set();
+    let answered = false;
+    let heartRewardAvailable = false;
+    let heartRewardClaimed = false;
+    let timerId = null;
+    let timeLeft = 0;
+
+    const startScreen = document.getElementById("startScreen");
+    const mainGame = document.getElementById("mainGame");
+    const startBtn = document.getElementById("startBtn");
+
+    const stageGrid = document.getElementById("stageGrid");
+    const progressBar = document.getElementById("progressBar");
+    const progressText = document.getElementById("progressText");
+    const doneCount = document.getElementById("doneCount");
+    const livesText = document.getElementById("lives");
+    const scoreText = document.getElementById("score");
+    const timerText = document.getElementById("timerText");
+    const miniTimer = document.getElementById("miniTimer");
+    const bonusHint = document.getElementById("bonusHint");
+
+    const sceneTag = document.getElementById("sceneTag");
+    const sceneTitle = document.getElementById("sceneTitle");
+    const sceneSummary = document.getElementById("sceneSummary");
+    const sceneObject = document.getElementById("sceneObject");
+    const bossSprite = document.getElementById("bossSprite");
+
+    const questionTag = document.getElementById("questionTag");
+    const questionTitle = document.getElementById("questionTitle");
+    const questionStory = document.getElementById("questionStory");
+    const questionPrompt = document.getElementById("questionPrompt");
+    const choiceList = document.getElementById("choiceList");
+    const feedback = document.getElementById("feedback");
+    const nextBtn = document.getElementById("nextBtn");
+    const restartBtn = document.getElementById("restartBtn");
+
+    const heartStation = document.getElementById("heartStation");
+    const healBtn = document.getElementById("healBtn");
+    const clearCard = document.getElementById("clearCard");
+
+    function maxUnlockedIndex() {
+      if (completed.size >= 5) return 5;
+      return completed.size;
+    }
+
+    function updateTimerDisplay() {
+      timerText.textContent = timeLeft;
+      miniTimer.textContent = timeLeft;
+    }
+
+    function stopTimer() {
+      if (timerId) {
+        clearInterval(timerId);
+        timerId = null;
+      }
+    }
+
+    function startTimer(seconds) {
+      stopTimer();
+      timeLeft = seconds;
+      updateTimerDisplay();
+      timerId = setInterval(() => {
+        if (answered) {
+          stopTimer();
+          return;
+        }
+        timeLeft -= 1;
+        updateTimerDisplay();
+        if (timeLeft <= 0) {
+          stopTimer();
+          autoFailByTimeout();
+        }
+      }, 1000);
+    }
+
+    function autoFailByTimeout() {
+      if (answered) return;
+      answered = true;
+      lives -= 1;
+
+      const buttons = [...choiceList.querySelectorAll(".choice-btn")];
+      const stage = stages[currentStage];
+      buttons.forEach((btn, idx) => {
+        if (idx === stage.answer) btn.classList.add("correct");
+        else btn.classList.add("dim");
+        btn.disabled = true;
+      });
+
+      feedback.className = "feedback show bad";
+      feedback.innerHTML = `⏱️ 시간 초과!<br>${stage.explanation}`;
+
+      if (lives <= 0) {
+        nextBtn.style.display = "none";
+        feedback.innerHTML += "<br><br>라이프가 모두 소진됐어요. 처음부터 다시 시작해서 다시 도전해보세요.";
+      } else {
+        nextBtn.style.display = "inline-flex";
+      }
+
+      updateProgress();
+      renderStageButtons();
+    }
+
+    function renderStageButtons() {
+      stageGrid.innerHTML = "";
+      stages.forEach((stage, idx) => {
+        const isDone = completed.has(idx);
+        const isLocked = idx > maxUnlockedIndex();
+        const btn = document.createElement("button");
+        btn.className = `stage-btn ${idx === currentStage ? "active" : ""} ${isDone ? "done" : ""} ${isLocked ? "locked" : ""} ${stage.boss ? "boss" : ""}`;
+        btn.innerHTML = `
+          <div class="stage-num">${idx + 1}</div>
+          <div class="stage-name">${stage.title}</div>
+        `;
+        btn.disabled = isLocked;
+        btn.addEventListener("click", () => {
+          currentStage = idx;
+          renderCurrentStage();
+        });
+        stageGrid.appendChild(btn);
+      });
+    }
+
+    function updateProgress() {
+      const progress = (completed.size / stages.length) * 100;
+      progressBar.style.width = `${progress}%`;
+      progressText.textContent = `${Math.round(progress)}%`;
+      doneCount.textContent = completed.size;
+      livesText.textContent = lives;
+      scoreText.textContent = score;
+    }
+
+    function renderCurrentStage() {
+      const stage = stages[currentStage];
+      answered = false;
+
+      sceneTag.textContent = stage.boss ? "FINAL BOSS" : `STAGE ${currentStage + 1}`;
+      sceneTitle.textContent = stage.title;
+      sceneSummary.textContent = stage.story;
+      bonusHint.textContent = `+${stage.timeLimit}점`;
+
+      if (stage.boss) {
+        sceneObject.style.display = "none";
+        bossSprite.style.display = "block";
+      } else {
+        sceneObject.style.display = "block";
+        bossSprite.style.display = "none";
+        sceneObject.className = `pixel-object ${stage.object}`;
+      }
+
+      questionTag.textContent = stage.boss ? "FINAL BOSS · 결전 문제" : `STAGE ${currentStage + 1} · ${stage.badge}`;
+      questionTitle.textContent = stage.title;
+      questionStory.textContent = stage.story;
+      questionPrompt.textContent = stage.question;
+      feedback.className = "feedback";
+      feedback.innerHTML = "";
+      nextBtn.style.display = "none";
+      choiceList.innerHTML = "";
+
+      stage.choices.forEach((choice, idx) => {
+        const btn = document.createElement("button");
+        btn.className = "choice-btn";
+        btn.textContent = `${idx + 1}. ${choice}`;
+        btn.addEventListener("click", () => answerQuestion(idx));
+        choiceList.appendChild(btn);
+      });
+
+      heartStation.classList.toggle("show", heartRewardAvailable && !heartRewardClaimed);
+      clearCard.classList.toggle("show", completed.size === stages.length);
+
+      renderStageButtons();
+      updateProgress();
+      startTimer(stage.timeLimit);
+    }
+
+    function answerQuestion(selected) {
+      if (answered) return;
+      answered = true;
+      stopTimer();
+
+      const stage = stages[currentStage];
+      const buttons = [...choiceList.querySelectorAll(".choice-btn")];
+
+      buttons.forEach((btn, idx) => {
+        if (idx === stage.answer) btn.classList.add("correct");
+        else if (idx === selected) btn.classList.add("wrong");
+        else btn.classList.add("dim");
+        btn.disabled = true;
+      });
+
+      if (selected === stage.answer) {
+        const bonus = timeLeft;
+        const earned = (10 + bonus) * (stage.boss ? 2 : 1);
+        score += earned;
+        completed.add(currentStage);
+        feedback.className = "feedback show good";
+        feedback.innerHTML = stage.boss
+          ? `👑 보스 격파 성공! 보스 배수 적용으로 ${earned}점 획득.<br>${stage.explanation}`
+          : `✅ 단계 돌파! 기본 10점 + 시간 보너스 ${bonus}점으로 ${earned}점 획득.<br>${stage.explanation}`;
+      } else {
+        lives -= 1;
+        feedback.className = "feedback show bad";
+        feedback.innerHTML = stage.boss
+          ? `💥 보스에게 밀렸어요.<br>${stage.explanation}`
+          : `❌ 재정비 필요!<br>${stage.explanation}`;
+      }
+
+      if (completed.has(3) && !heartRewardClaimed) {
+        heartRewardAvailable = true;
+      }
+
+      if (lives <= 0) {
+        nextBtn.style.display = "none";
+        feedback.className = "feedback show bad";
+        feedback.innerHTML += "<br><br>라이프가 모두 소진됐어요. 처음부터 다시 시작해서 다시 도전해보세요.";
+      } else {
+        nextBtn.style.display = "inline-flex";
+      }
+
+      renderStageButtons();
+      updateProgress();
+      heartStation.classList.toggle("show", heartRewardAvailable && !heartRewardClaimed);
+    }
+
+    function nextStage() {
+      if (lives <= 0) return;
+
+      if (completed.size === stages.length) {
+        clearCard.classList.add("show");
+        nextBtn.style.display = "none";
+        feedback.className = "feedback show good";
+        feedback.innerHTML = "🌟 모든 단계와 보스 퀴즈를 클리어했어요. 상단 진행률도 100% 달성!";
+        renderStageButtons();
+        updateProgress();
+        stopTimer();
+        return;
+      }
+
+      currentStage = Math.min(maxUnlockedIndex(), stages.length - 1);
+      renderCurrentStage();
+    }
+
+    function claimStage4Heart() {
+      if (!heartRewardAvailable || heartRewardClaimed) return;
+      lives = Math.min(3, lives + 1);
+      heartRewardClaimed = true;
+      heartRewardAvailable = false;
+      heartStation.classList.remove("show");
+      updateProgress();
+    }
+
+    function restartGame() {
+      stopTimer();
+      currentStage = 0;
+      score = 0;
+      lives = 3;
+      completed = new Set();
+      answered = false;
+      heartRewardAvailable = false;
+      heartRewardClaimed = false;
+      clearCard.classList.remove("show");
+      renderCurrentStage();
+    }
+
+    startBtn.addEventListener("click", () => {
+      startScreen.classList.add("hidden");
+      mainGame.classList.remove("hidden-main");
+      renderCurrentStage();
+    });
+
+    nextBtn.addEventListener("click", nextStage);
+    restartBtn.addEventListener("click", restartGame);
+    healBtn.addEventListener("click", claimStage4Heart);
+  </script>
+</body>
+</html>
